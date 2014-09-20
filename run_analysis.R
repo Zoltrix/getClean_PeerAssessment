@@ -1,4 +1,5 @@
 library(plyr)
+library(tidyr)
 library(reshape2)
 
 #include the file that downloads the data in case not found in the current working
@@ -68,6 +69,8 @@ names(merged.data) <- gsub("\\(\\)", "", names(merged.data))
 ### add a new column representing the activity
 
 # list of activities, their indices match the numbering in 'activity_labels.txt'
+# NOTE: since there is only 6 activites, i chose to hard code them, if there were
+# more than that, i would have read them and cleaned them from the .txt file
 activities <- c("Walking", "WalkingUpStairs", "WalkingDownStairs", "Sitting", 
 		"Standing", "Laying")
 
@@ -85,12 +88,26 @@ merged.data <- cbind(merged.data, merged.subject)
 # convert the subject column to factor
 merged.data$subject <- as.factor(merged.data$subject)
 
+###Creating the tidy data : Step 5
+
 # reshape the data with id variables of subject and activity
 # the rest of the columns are measure variables
 melted <- melt(merged.data, id.vars = c("subject", "activity"))
 
-# use the plyr package to do summarize and get the mean for each variable
-tidy <- ddply(melted, c("subject", "activity"), summarise, mean = mean(value))
+# use the plyr package to summarize and get the mean for each variable
+almost.tidy <- ddply(melted, c("subject", "activity"), summarise, mean = mean(value))
+
+# now tidy looks like this which is not quite tidy yet
+#     subject          activity          mean
+# 1         1            Laying -0.6815819785
+# 2         1           Sitting -0.7250102567
+# 3         1          Standing -0.7518868639
+# 4         1           Walking -0.1932045725
+# 5         1 WalkingDownStairs -0.1493580354
+# 6         1   WalkingUpStairs -0.3153368084
+
+#we need to 'spread' the activity i.e turn it into variable (column)
+tidy <- spread(almost.tidy, activity, mean)
 
 # write the output of the tidy data set to tidy.txt
 write.table(tidy, "tidy.txt", row.names = FALSE)
