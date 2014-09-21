@@ -95,19 +95,19 @@ merged.data$subject <- as.factor(merged.data$subject)
 melted <- melt(merged.data, id.vars = c("subject", "activity"))
 
 # use the plyr package to summarize and get the mean for each variable
-almost.tidy <- ddply(melted, c("subject", "activity"), summarise, mean = mean(value))
+almost.tidy <- ddply(melted, c("subject", "activity", "variable"), summarise, mean = mean(value))
 
 # now tidy looks like this which is not quite tidy yet
-#     subject          activity          mean
-# 1         1            Laying -0.6815819785
-# 2         1           Sitting -0.7250102567
-# 3         1          Standing -0.7518868639
-# 4         1           Walking -0.1932045725
-# 5         1 WalkingDownStairs -0.1493580354
-# 6         1   WalkingUpStairs -0.3153368084
+#  subject activity        variable        mean
+#1       1   Laying tBodyAcc.mean.X  0.22159824
+#2       1   Laying tBodyAcc.mean.Y -0.04051395
+#3       1   Laying tBodyAcc.mean.Z -0.11320355
+#4       1   Laying  tBodyAcc.std.X -0.92805647
+#5       1   Laying  tBodyAcc.std.Y -0.83682741
+#6       1   Laying  tBodyAcc.std.Z -0.82606140
 
-#we need to 'spread' the activity i.e turn it into variable (column)
-tidy <- spread(almost.tidy, activity, mean)
+#we need to 'spread' the variable column
+tidy <- spread(almost.tidy, variable, mean)
 
 # write the output of the tidy data set to tidy.txt
 write.table(tidy, "tidy.txt", row.names = FALSE)
